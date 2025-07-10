@@ -1,10 +1,9 @@
-
 import TelegramBot from 'node-telegram-bot-api';
 import axios from 'axios';
 import express from 'express';
 
 // === Your credentials ===
-const TELEGRAM_TOKEN = '7655482876:AAEnwJeJQA4B0eYwnSEhrCJsbmuERlSoOtE';
+const TELEGRAM_TOKEN = '7741072999:AAH2kj4m_N6pXjuH3lNUO5SeggE1mf03HRk';
 const ETHERSCAN_API = 'HCBYJC9Z4MV3J8GUKAGY45S4UFR5A3GJHT';
 const BSCSCAN_API = 'UP67QXP1XY6PFZJN4HFDIK9MKB9WWNM14J';
 const USDT_ERC20 = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
@@ -37,12 +36,13 @@ bot.on('message', async (msg) => {
   bot.sendMessage(chatId, '⏳ We are working on it... Please wait for the result.');
 
   try {
-    const [eth, erc20, bnb, bep20, tx] = await Promise.all([
+    const [eth, erc20, bnb, bep20, tx, erc20Txs] = await Promise.all([
       axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${userInput}&tag=latest&apikey=${ETHERSCAN_API}`),
       axios.get(`https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${USDT_ERC20}&address=${userInput}&tag=latest&apikey=${ETHERSCAN_API}`),
       axios.get(`https://api.bscscan.com/api?module=account&action=balance&address=${userInput}&apikey=${BSCSCAN_API}`),
       axios.get(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${USDT_BEP20}&address=${userInput}&tag=latest&apikey=${BSCSCAN_API}`),
-      axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${userInput}&sort=desc&apikey=${ETHERSCAN_API}`)
+      axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${userInput}&sort=desc&apikey=${ETHERSCAN_API}`),
+      axios.get(`https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${USDT_ERC20}&address=${userInput}&sort=desc&apikey=${ETHERSCAN_API}`)
     ]);
 
     const ethBal = (parseFloat(eth.data.result) / 1e18).toFixed(4);
@@ -56,6 +56,24 @@ bot.on('message', async (msg) => {
       ? new Date(lastTx.timeStamp * 1000).toUTCString()
       : 'N/A';
 
+    // ===== 🆕 Build Last 3 USDT ERC20 Transactions
+    const txList = erc20Txs.data.result.slice(0, 3); // last 3 tx
+    let txHistory = '\n🧾 Last 3 USDT (ERC-20) Transactions:\n\n';
+
+    if (txList.length === 0) {
+      txHistory += '⚠️ No recent USDT transactions found.\n';
+    } else {
+      txList.forEach((tx, index) => {
+        const isReceived = tx.to.toLowerCase() === userInput.toLowerCase();
+        const direction = isReceived ? '🟢 Received' : '🔴 Sent';
+        const amount = (parseFloat(tx.value) / 1e6).toFixed(2);
+        const date = new Date(tx.timeStamp * 1000).toUTCString();
+        const txLink = `https://etherscan.io/tx/${tx.hash}`;
+        txHistory += `${index + 1}. ${direction}\n💰 ${amount} USDT\n🕒 ${date}\n🔗 ${txLink}\n\n`;
+      });
+    }
+
+    // === Final Reply
     const reply = `🔔 Wallet Update
 
 💼 Address: ${userInput}
@@ -69,6 +87,7 @@ bot.on('message', async (msg) => {
 🆔 ${lastTxHash}
 📅 ${lastTxDate}
 
+${txHistory}
 Bot Created by Ronaldo ( Thanks for using the Bot )`;
 
     bot.sendMessage(chatId, reply);
