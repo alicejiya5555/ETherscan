@@ -44,11 +44,7 @@ bot.on('message', async (msg) => {
       axios.get(`https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${USDT_ERC20}&address=${userInput}&tag=latest&apikey=${ETHERSCAN_API}`),
       axios.get(`https://api.bscscan.com/api?module=account&action=balance&address=${userInput}&apikey=${BSCSCAN_API}`),
       axios.get(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${USDT_BEP20}&address=${userInput}&tag=latest&apikey=${BSCSCAN_API}`),
-
-      // New: USDT ERC20 Transfers
       axios.get(`https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${USDT_ERC20}&address=${userInput}&sort=desc&apikey=${ETHERSCAN_API}`),
-
-      // New: USDT BEP20 Transfers
       axios.get(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${USDT_BEP20}&address=${userInput}&sort=desc&apikey=${BSCSCAN_API}`)
     ]);
 
@@ -68,10 +64,7 @@ bot.on('message', async (msg) => {
         const status = isReceived ? '🟢 Received' : '🔴 Sent';
         const amount = (parseFloat(tx.value) / 1e6).toFixed(2);
         const date = new Date(tx.timeStamp * 1000).toLocaleString();
-        result += `\n${idx + 1}. ${status}
-💵 Amount: ${amount} USDT
-🔗 Tx: ${tx.hash.slice(0, 10)}...
-📅 ${date}\n`;
+        result += `\n${idx + 1}. ${status}\n💵 Amount: ${amount} USDT\n🔗 Tx: ${tx.hash.slice(0, 10)}...\n📅 ${date}\n`;
       });
 
       return result;
