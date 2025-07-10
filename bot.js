@@ -36,12 +36,20 @@ bot.on('message', async (msg) => {
   bot.sendMessage(chatId, '⏳ We are working on it... Please wait for the result.');
 
   try {
-    const [eth, erc20, bnb, bep20, tx] = await Promise.all([
+    const [
+      eth, erc20, bnb, bep20,
+      usdtErcTx, usdtBepTx
+    ] = await Promise.all([
       axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${userInput}&tag=latest&apikey=${ETHERSCAN_API}`),
       axios.get(`https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${USDT_ERC20}&address=${userInput}&tag=latest&apikey=${ETHERSCAN_API}`),
       axios.get(`https://api.bscscan.com/api?module=account&action=balance&address=${userInput}&apikey=${BSCSCAN_API}`),
       axios.get(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${USDT_BEP20}&address=${userInput}&tag=latest&apikey=${BSCSCAN_API}`),
-      axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${userInput}&sort=desc&apikey=${ETHERSCAN_API}`)
+
+      // New: USDT ERC20 Transfers
+      axios.get(`https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${USDT_ERC20}&address=${userInput}&sort=desc&apikey=${ETHERSCAN_API}`),
+
+      // New: USDT BEP20 Transfers
+      axios.get(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${USDT_BEP20}&address=${userInput}&sort=desc&apikey=${BSCSCAN_API}`)
     ]);
 
     const ethBal = (parseFloat(eth.data.result) / 1e18).toFixed(4);
@@ -49,25 +57,28 @@ bot.on('message', async (msg) => {
     const bnbBal = (parseFloat(bnb.data.result) / 1e18).toFixed(4);
     const bep20Bal = (parseFloat(bep20.data.result) / 1e18).toFixed(2);
 
-    // === Last 5 transactions with color tags ===
-    const txList = tx.data.result.slice(0, 5);
-    let txHistory = '\n📜 Last 5 ETH Transactions:\n';
+    const formatTxList = (txArray, walletAddress, network) => {
+      if (!txArray || txArray.length === 0) return `⚠️ No recent USDT transactions found on ${network}.`;
 
-    if (txList.length === 0) {
-      txHistory += '⚠️ No transaction history found.';
-    } else {
-      txList.forEach((t, index) => {
-        const isReceived = t.to.toLowerCase() === userInput.toLowerCase();
-        const statusEmoji = isReceived ? '🟢 Received' : '🔴 Sent';
-        const valueEth = (parseFloat(t.value) / 1e18).toFixed(4);
-        const date = new Date(t.timeStamp * 1000).toLocaleString();
+      const latest5 = txArray.slice(0, 5);
+      let result = `📜 Last 5 USDT (${network}) Transactions:\n`;
 
-        txHistory += `\n${index + 1}. ${statusEmoji}
-💸 Value: ${valueEth} ETH
-🆔 TxHash: ${t.hash.slice(0, 12)}...
-📅 Date: ${date}\n`;
+      latest5.forEach((tx, idx) => {
+        const isReceived = tx.to.toLowerCase() === walletAddress.toLowerCase();
+        const status = isReceived ? '🟢 Received' : '🔴 Sent';
+        const amount = (parseFloat(tx.value) / 1e6).toFixed(2);
+        const date = new Date(tx.timeStamp * 1000).toLocaleString();
+        result += `\n${idx + 1}. ${status}
+💵 Amount: ${amount} USDT
+🔗 Tx: ${tx.hash.slice(0, 10)}...
+📅 ${date}\n`;
       });
-    }
+
+      return result;
+    };
+
+    const usdtErcHistory = formatTxList(usdtErcTx.data.result, userInput, 'ERC20');
+    const usdtBepHistory = formatTxList(usdtBepTx.data.result, userInput, 'BEP20');
 
     const reply = `🔔 Wallet Update
 
@@ -78,9 +89,10 @@ bot.on('message', async (msg) => {
 🟡 BNB: ${bnbBal}
 💵 USDT (BEP20): ${bep20Bal}
 
-${txHistory}
+${usdtErcHistory}
+${usdtBepHistory}
 
-Bot Created by Ronaldo ( Thanks for using the Bot )`;
+🤖 Bot by Ronaldo – Fortune favors the wise 💎`;
 
     bot.sendMessage(chatId, reply);
   } catch (error) {
