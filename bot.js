@@ -1,4 +1,3 @@
-
 import TelegramBot from 'node-telegram-bot-api';
 import axios from 'axios';
 import express from 'express';
@@ -50,11 +49,25 @@ bot.on('message', async (msg) => {
     const bnbBal = (parseFloat(bnb.data.result) / 1e18).toFixed(4);
     const bep20Bal = (parseFloat(bep20.data.result) / 1e18).toFixed(2);
 
-    const lastTx = tx.data.result[0];
-    const lastTxHash = lastTx?.hash || 'No transactions found';
-    const lastTxDate = lastTx?.timeStamp
-      ? new Date(lastTx.timeStamp * 1000).toUTCString()
-      : 'N/A';
+    // === Last 5 transactions with color tags ===
+    const txList = tx.data.result.slice(0, 5);
+    let txHistory = '\n📜 Last 5 ETH Transactions:\n';
+
+    if (txList.length === 0) {
+      txHistory += '⚠️ No transaction history found.';
+    } else {
+      txList.forEach((t, index) => {
+        const isReceived = t.to.toLowerCase() === userInput.toLowerCase();
+        const statusEmoji = isReceived ? '🟢 Received' : '🔴 Sent';
+        const valueEth = (parseFloat(t.value) / 1e18).toFixed(4);
+        const date = new Date(t.timeStamp * 1000).toLocaleString();
+
+        txHistory += `\n${index + 1}. ${statusEmoji}
+💸 Value: ${valueEth} ETH
+🆔 TxHash: ${t.hash.slice(0, 12)}...
+📅 Date: ${date}\n`;
+      });
+    }
 
     const reply = `🔔 Wallet Update
 
@@ -65,9 +78,7 @@ bot.on('message', async (msg) => {
 🟡 BNB: ${bnbBal}
 💵 USDT (BEP20): ${bep20Bal}
 
-🔁 New ETH Tx Detected:
-🆔 ${lastTxHash}
-📅 ${lastTxDate}
+${txHistory}
 
 Bot Created by Ronaldo ( Thanks for using the Bot )`;
 
