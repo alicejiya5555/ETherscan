@@ -1,7 +1,7 @@
 {
   "name": "telegram-balance-bot",
   "version": "1.0.0",
-  "description": "Telegram bot to check ETH, BNB, USDT (ERC20 & BEP20) balances",
+  "description": "Telegram bot to check ETH, BNB, USDT (ERC20 & BEP20) balances and recent transactions",
   "main": "bot.js",
   "type": "module",
   "scripts": {
@@ -23,7 +23,10 @@
     "bscscan",
     "usdt",
     "bnb",
-    "ethereum"
+    "ethereum",
+    "erc20",
+    "bep20",
+    "transactions"
   ],
   "author": "Ronaldo",
   "license": "ISC"
