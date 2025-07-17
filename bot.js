@@ -229,114 +229,76 @@ function getUltimateOscillator(candles) {
   return uo.toFixed(2);
 }
 
-// 📊 SuperTrend Indicator (ATR Based Trend-Follower)
+// 📊 SuperTrend Indicator (ATR Based)
 function getSuperTrend(candles, period = 10, multiplier = 3) {
-  const close = candles.map(c => c.close);
-  const high = candles.map(c => c.high);
-  const low = candles.map(c => c.low);
+  const close = candles.map(c => parseFloat(c.close));
+  const high = candles.map(c => parseFloat(c.high));
+  const low = candles.map(c => parseFloat(c.low));
 
   const atr = ti.ATR.calculate({ period, high, low, close });
-  if (atr.length === 0) return { trend: 'N/A', value: 'N/A' };
+  if (atr.length === 0) return { value: 'N/A' };
 
   let superTrend = [];
-  let upperBand = [];
-  let lowerBand = [];
-  let trend = 'neutral';
+  let upperBand = (high[0] + low[0]) / 2;
+  let lowerBand = (high[0] + low[0]) / 2;
 
   for (let i = 0; i < close.length; i++) {
     if (i < period) {
-      superTrend.push(0);
-      upperBand.push(0);
-      lowerBand.push(0);
+      superTrend.push((high[i] + low[i]) / 2);
       continue;
     }
 
-    const atrValue = atr[i - 1];
     const hl2 = (high[i] + low[i]) / 2;
-    const currentUpper = hl2 + multiplier * atrValue;
-    const currentLower = hl2 - multiplier * atrValue;
+    const currentUpper = hl2 + multiplier * atr[i-1];
+    const currentLower = hl2 - multiplier * atr[i-1];
 
-    upperBand.push(currentUpper);
-    lowerBand.push(currentLower);
+    upperBand = (currentUpper < upperBand || close[i-1] > upperBand) 
+      ? currentUpper : upperBand;
+    lowerBand = (currentLower > lowerBand || close[i-1] < lowerBand) 
+      ? currentLower : lowerBand;
 
-    if (i === period) {
-      superTrend.push(currentUpper);
-      trend = 'downtrend';
-    } else {
-      const prevClose = close[i - 1];
-      const prevSuperTrend = superTrend[i - 1];
-
-      if (prevSuperTrend === upperBand[i - 1]) {
-        if (close[i] <= currentUpper) {
-          superTrend.push(currentUpper);
-          trend = 'downtrend';
-        } else {
-          superTrend.push(currentLower);
-          trend = 'uptrend';
-        }
-      } else {
-        if (close[i] >= currentLower) {
-          superTrend.push(currentLower);
-          trend = 'uptrend';
-        } else {
-          superTrend.push(currentUpper);
-          trend = 'downtrend';
-        }
-      }
-    }
+    superTrend.push(
+      close[i] > superTrend[i-1] 
+        ? Math.max(lowerBand, superTrend[i-1])
+        : Math.min(upperBand, superTrend[i-1])
+    );
   }
 
   return {
-    trend,
     value: superTrend.length ? superTrend[superTrend.length - 1].toFixed(2) : 'N/A'
   };
 }
 
 // 📊 Traders Dynamic Index (TDI)
-function getTDI(candles, rsiPeriod = 13, volatilityBand = 34, rsiPriceLine = 2, tradeSignalLine = 7) {
+function getTDI(candles) {
   const close = candles.map(c => c.close);
-  
-  // Calculate RSI
-  const rsi = ti.RSI.calculate({ period: rsiPeriod, values: close });
-  if (rsi.length < volatilityBand) return { tdi: 'N/A', trend: 'N/A' };
+  const rsi = ti.RSI.calculate({ period: 13, values: close });
+  if (rsi.length < 34) return { value: 'N/A' };
 
-  // Calculate Bollinger Bands on RSI
   const bb = ti.BollingerBands.calculate({
-    period: volatilityBand,
+    period: 34,
     values: rsi,
-    stdDev: rsiPriceLine
+    stdDev: 2
   });
 
-  // Calculate Signal Line (MA of RSI)
   const signalLine = ti.SMA.calculate({
-    period: tradeSignalLine,
+    period: 7,
     values: rsi
   });
 
-  if (!bb.length || !signalLine.length) return { tdi: 'N/A', trend: 'N/A' };
-
-  const latestBB = bb[bb.length - 1];
-  const latestRSI = rsi[rsi.length - 1];
-  const latestSignal = signalLine[signalLine.length - 1];
-
-  let trend = 'neutral';
-  if (latestRSI > latestBB.upper) trend = 'overbought';
-  else if (latestRSI < latestBB.lower) trend = 'oversold';
-  else if (latestRSI > latestSignal) trend = 'bullish';
-  else if (latestRSI < latestSignal) trend = 'bearish';
+  if (!bb.length || !signalLine.length) return { value: 'N/A' };
 
   return {
-    tdi: latestRSI.toFixed(2),
-    trend,
-    upperBand: latestBB.upper.toFixed(2),
-    lowerBand: latestBB.lower.toFixed(2),
-    signalLine: latestSignal.toFixed(2)
+    value: rsi[rsi.length - 1].toFixed(2),
+    upperBand: bb[bb.length - 1].upper.toFixed(2),
+    lowerBand: bb[bb.length - 1].lower.toFixed(2),
+    signalLine: signalLine[signalLine.length - 1].toFixed(2)
   };
 }
 
 // 📊 Heikin Ashi Candles
 function getHeikinAshi(candles) {
-  if (candles.length < 2) return { trend: 'N/A', candle: 'N/A' };
+  if (candles.length < 2) return { close: 'N/A' };
 
   const haCandles = [];
   let prevHa = null;
@@ -345,12 +307,9 @@ function getHeikinAshi(candles) {
     const current = candles[i];
     
     if (!prevHa) {
-      // First candle is same as regular candle
       const haClose = (current.open + current.high + current.low + current.close) / 4;
       prevHa = {
         open: current.open,
-        high: current.high,
-        low: current.low,
         close: haClose
       };
       haCandles.push(prevHa);
@@ -359,13 +318,9 @@ function getHeikinAshi(candles) {
 
     const haClose = (current.open + current.high + current.low + current.close) / 4;
     const haOpen = (prevHa.open + prevHa.close) / 2;
-    const haHigh = Math.max(current.high, haOpen, haClose);
-    const haLow = Math.min(current.low, haOpen, haClose);
 
     const haCandle = {
       open: haOpen,
-      high: haHigh,
-      low: haLow,
       close: haClose
     };
 
@@ -373,24 +328,14 @@ function getHeikinAshi(candles) {
     prevHa = haCandle;
   }
 
-  const latestHa = haCandles[haCandles.length - 1];
-  let trend = 'neutral';
-  
-  if (latestHa.close > latestHa.open) {
-    trend = latestHa.close > latestHa.high * 0.95 ? 'strong uptrend' : 'uptrend';
-  } else if (latestHa.close < latestHa.open) {
-    trend = latestHa.close < latestHa.low * 1.05 ? 'strong downtrend' : 'downtrend';
-  }
-
   return {
-    trend,
-    candle: latestHa,
-    close: latestHa.close.toFixed(2)
+    close: haCandles[haCandles.length - 1].close.toFixed(2)
   };
 }
 
 // 📊 Choppiness Index
-function getChoppinessIndex(candles, period = 14) {
+function getChoppinessIndex(candles) {
+  const period = 14;
   if (candles.length < period + 1) return 'N/A';
 
   const close = candles.map(c => c.close);
@@ -415,14 +360,7 @@ function getChoppinessIndex(candles, period = 14) {
   const atrRatio = sumATR / (maxHigh - minLow);
   const ci = 100 * Math.log10(atrRatio) / Math.log10(period);
 
-  let marketCondition = 'trending';
-  if (ci > 61.8) marketCondition = 'choppy';
-  else if (ci < 38.2) marketCondition = 'strong trend';
-
-  return {
-    value: Math.min(100, Math.max(0, ci)).toFixed(2),
-    condition: marketCondition
-  };
+  return Math.min(100, Math.max(0, ci)).toFixed(2);
 }
 
 // --- Indicator Calculations ---
@@ -491,19 +429,6 @@ function calculateIndicators(candles) {
     period: 14,
     values: close
   }));
-
-  // 📉 WILLIAMS %R (14)
-  function getWilliamsR(candles) {
-    const highs = candles.slice(-14).map(c => parseFloat(c[2]));
-    const lows = candles.slice(-14).map(c => parseFloat(c[3]));
-    const close = parseFloat(candles[candles.length - 1][4]);
-
-    const highestHigh = Math.max(...highs);
-    const lowestLow = Math.min(...lows);
-
-    const williamsR = ((highestHigh - close) / (highestHigh - lowestLow)) * -100;
-    return williamsR.toFixed(2);
-  }
 
   // 📉 ICHIMOKU (9, 26, 52)
   function getIchimoku(candles) {
@@ -663,21 +588,14 @@ function calculateIndicators(candles) {
     ichimokuSpanA: ichimoku.leadingSpanA,
     ichimokuSpanB: ichimoku.leadingSpanB,
     
-    // New indicators
-    superTrendValue: superTrend.value,
-    superTrendTrend: superTrend.trend,
-    
-    tdiValue: tdi.tdi,
-    tdiTrend: tdi.trend,
+    // New indicators (without trend)
+    superTrend: superTrend.value,
+    tdi: tdi.value,
     tdiUpperBand: tdi.upperBand,
     tdiLowerBand: tdi.lowerBand,
     tdiSignalLine: tdi.signalLine,
-    
-    heikinAshiClose: heikinAshi.close,
-    heikinAshiTrend: heikinAshi.trend,
-    
-    choppinessIndex: choppinessIndex.value,
-    choppinessCondition: choppinessIndex.condition
+    heikinAshi: heikinAshi.close,
+    choppinessIndex: choppinessIndex
   };
 }
 
@@ -847,15 +765,13 @@ const ichimokuSection =
 // New indicators sections
 const superTrendSection =
 `📈 SuperTrend (10,3):
- - Value: ${indicators.superTrendValue}
- - Trend: ${indicators.superTrendTrend}
+ - Value: ${indicators.superTrend}
 
 `;
 
 const tdiSection =
 `📊 Traders Dynamic Index (TDI):
- - RSI (13): ${indicators.tdiValue}
- - Trend: ${indicators.tdiTrend}
+ - RSI (13): ${indicators.tdi}
  - Upper Band: ${indicators.tdiUpperBand}
  - Lower Band: ${indicators.tdiLowerBand}
  - Signal Line (7): ${indicators.tdiSignalLine}
@@ -864,25 +780,22 @@ const tdiSection =
 
 const heikinAshiSection =
 `🕯 Heikin Ashi:
- - Close: ${indicators.heikinAshiClose}
- - Trend: ${indicators.heikinAshiTrend}
+ - Close: ${indicators.heikinAshi}
 
 `;
 
 const choppinessSection =
 `🌀 Choppiness Index (14):
  - Value: ${indicators.choppinessIndex}
- - Market Condition: ${indicators.choppinessCondition}
 
 `;
 
-  // Your added custom words here:
-  const extraNotes =
+  // Split extra notes into two parts
+  const extraNotesPart1 =
 `
-Calculate Values of all thes Indicatotors and Give me Out Put:
 📍 Final Signal Summary
-📉 What is the overall trend direction? (Bullish, Bearish, or Sideways, positive,Negative, Neutral)
-📊 Provide a detailed breakdown of indicator behaviors — RSI, MACD, EMA, Volume, etc.
+📉 What is the overall trend direction? (Bullish, Bearish, or Sideways)
+📊 Provide a detailed breakdown of indicator behaviors — RSI, MACD, EMA, Volume
 🔍 Is there any hidden or classic divergence visible (on RSI, MACD, or OBV)?
 📈 Are EMAs aligned in a bullish or bearish structure?
 🌡 Present a momentum heatmap — Is momentum rising or fading?
@@ -890,8 +803,12 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 🧪 Compare current indicators with historically successful setups
 ⚠️ Scan for breakout or volatility pressure — Are we in a compression or expansion zone?
 🔄 After a breakout, is a retest likely? Should we wait for confirmation?
-🌬️ Based on news, Twitter, and volume — what’s the real-time sentiment?
-🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar, etc.
+🌬️ Based on news, Twitter, and volume — what's the real-time sentiment?
+`;
+
+  const extraNotesPart2 =
+`
+🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar
 🔄 Determine whether a reversal or continuation pattern is forming
 🌀 Are there any repeating fractal patterns from past cycles?
 🐾 Is this setup potentially a bull trap or bear trap?
@@ -903,15 +820,19 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 📉 Recommend profitable buy and sell price ranges for this asset
 ⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
 🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
-);
-
+🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
+📅 Offer a 3-day or weekly forecast — What's the expected asset behavior?
+📰 Is there any upcoming news or event that could impact the market or this asset?
+🧠 Suggest the best strategy type for this setup (Scalp, Swing, Position, or News-Driven)
+📢 Offer final trading advice — Mindset, Psychology, and Position Sizing
+🔁 Is this setup a reversal or continuation opportunity? How clear is the signal?
 `;
 
  return header + smaSection + emaSection + wmaSection + macdSection + rsiSection + stochRsiSection + 
         kdjSection + williamsSection + cciSection + rocSection + mtmSection + uoSection + 
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
-        choppinessSection + extraNotes;
+        choppinessSection + extraNotesPart1 + extraNotesPart2;
 }
 
 // --- Command Handler ---
