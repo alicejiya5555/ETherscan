@@ -820,12 +820,6 @@ const choppinessSection =
 📉 Recommend profitable buy and sell price ranges for this asset
 ⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
 🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
-🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
-📅 Offer a 3-day or weekly forecast — What's the expected asset behavior?
-📰 Is there any upcoming news or event that could impact the market or this asset?
-🧠 Suggest the best strategy type for this setup (Scalp, Swing, Position, or News-Driven)
-📢 Offer final trading advice — Mindset, Psychology, and Position Sizing
-🔁 Is this setup a reversal or continuation opportunity? How clear is the signal?
 `;
 
  return header + smaSection + emaSection + wmaSection + macdSection + rsiSection + stochRsiSection + 
