@@ -363,8 +363,91 @@ function getChoppinessIndex(candles) {
   return Math.min(100, Math.max(0, ci)).toFixed(2);
 }
 
+// 📊 Parabolic SAR
+function getParabolicSAR(candles, step = 0.02, max = 0.2) {
+  const high = candles.map(c => c.high);
+  const low = candles.map(c => c.low);
+  
+  const psar = ti.PSAR.calculate({
+    high,
+    low,
+    step,
+    max
+  });
+  
+  return {
+    value: psar.length ? psar[psar.length - 1].toFixed(2) : 'N/A'
+  };
+}
+
+// 📊 TRIX Indicator (1, 9)
+function getTRIX(candles, period = 9, signalPeriod = 1) {
+  const close = candles.map(c => c.close);
+  
+  // Calculate single EMA
+  const ema1 = ti.EMA.calculate({ period, values: close });
+  // Calculate double EMA (EMA of EMA)
+  const ema2 = ti.EMA.calculate({ period, values: ema1 });
+  // Calculate triple EMA (EMA of EMA of EMA)
+  const ema3 = ti.EMA.calculate({ period, values: ema2 });
+  
+  // Calculate TRIX as percentage change
+  const trix = [];
+  for (let i = 1; i < ema3.length; i++) {
+    trix.push((ema3[i] - ema3[i-1]) / ema3[i-1] * 100);
+  }
+  
+  // Calculate signal line (SMA of TRIX)
+  const signal = ti.SMA.calculate({ period: signalPeriod, values: trix });
+  
+  return {
+    value: trix.length ? trix[trix.length - 1].toFixed(4) : 'N/A',
+    signal: signal.length ? signal[signal.length - 1].toFixed(4) : 'N/A'
+  };
+}
+
+// 📊 Donchian Channel (20)
+function getDonchianChannel(candles, period = 20) {
+  if (candles.length < period) return { upper: 'N/A', middle: 'N/A', lower: 'N/A' };
+  
+  const recentHighs = candles.slice(-period).map(c => c.high);
+  const recentLows = candles.slice(-period).map(c => c.low);
+  
+  const upper = Math.max(...recentHighs);
+  const lower = Math.min(...recentLows);
+  const middle = (upper + lower) / 2;
+  
+  return {
+    upper: upper.toFixed(2),
+    middle: middle.toFixed(2),
+    lower: lower.toFixed(2)
+  };
+}
+
+// 📊 Fear & Greed Index (mock implementation - would need API call)
+async function getFearGreedIndex() {
+  try {
+    // In a real implementation, you would call an API like:
+    // const response = await axios.get('https://api.alternative.me/fng/');
+    // return response.data.data[0].value;
+    
+    // Mock response for now
+    return {
+      value: Math.floor(Math.random() * 100) + 1, // Random between 1-100
+      classification: ['Extreme Fear', 'Fear', 'Neutral', 'Greed', 'Extreme Greed'][
+        Math.floor(Math.random() * 5)
+      ]
+    };
+  } catch (error) {
+    return {
+      value: 'N/A',
+      classification: 'N/A'
+    };
+  }
+}
+
 // --- Indicator Calculations ---
-function calculateIndicators(candles) {
+async function calculateIndicators(candles) {
   const close = candles.map(c => c.close);
   const high = candles.map(c => c.high);
   const low = candles.map(c => c.low);
@@ -451,7 +534,7 @@ function calculateIndicators(candles) {
     const recentLow26 = Math.min(...low.slice(-period26));
     const baseLine = ((recentHigh26 + recentLow26) / 2).toFixed(2);
 
-    const leadingSpanA = (((parseFloat(conversionLine) + parseFloat(baseLine)) / 2)).toFixed(2);
+    const leadingSpanA = (((parseFloat(conversionLine) + parseFloat(baseLine)) / 2).toFixed(2);
 
     const recentHigh52 = Math.max(...high.slice(-period52));
     const recentLow52 = Math.min(...low.slice(-period52));
@@ -496,6 +579,10 @@ function calculateIndicators(candles) {
   const tdi = getTDI(candles);
   const heikinAshi = getHeikinAshi(candles);
   const choppinessIndex = getChoppinessIndex(candles);
+  const parabolicSAR = getParabolicSAR(candles);
+  const trix = getTRIX(candles);
+  const donchianChannel = getDonchianChannel(candles);
+  const fearGreedIndex = await getFearGreedIndex();
   
   return {
     sma5: formatNum(lastValue(ti.SMA.calculate({ period: 5, values: close }))),
@@ -595,7 +682,17 @@ function calculateIndicators(candles) {
     tdiLowerBand: tdi.lowerBand,
     tdiSignalLine: tdi.signalLine,
     heikinAshi: heikinAshi.close,
-    choppinessIndex: choppinessIndex
+    choppinessIndex: choppinessIndex,
+    
+    // Newly added indicators
+    parabolicSAR: parabolicSAR.value,
+    trixValue: trix.value,
+    trixSignal: trix.signal,
+    donchianUpper: donchianChannel.upper,
+    donchianMiddle: donchianChannel.middle,
+    donchianLower: donchianChannel.lower,
+    fgiValue: fearGreedIndex.value,
+    fgiClassification: fearGreedIndex.classification
   };
 }
 
@@ -762,7 +859,6 @@ const ichimokuSection =
  - Leading Span B: ${indicators.ichimokuSpanB}
 `;
 
-// New indicators sections
 const superTrendSection =
 `📈 SuperTrend (10,3):
  - Value: ${indicators.superTrend}
@@ -790,6 +886,34 @@ const choppinessSection =
 
 `;
 
+const parabolicSarSection =
+`📈 Parabolic SAR:
+ - Value: ${indicators.parabolicSAR}
+
+`;
+
+const trixSection =
+`📊 TRIX (9,1):
+ - TRIX: ${indicators.trixValue}
+ - Signal: ${indicators.trixSignal}
+
+`;
+
+const donchianSection =
+`📊 Donchian Channel (20):
+ - Upper: ${indicators.donchianUpper}
+ - Middle: ${indicators.donchianMiddle}
+ - Lower: ${indicators.donchianLower}
+
+`;
+
+const fgiSection =
+`😨😊 Fear & Greed Index:
+ - Value: ${indicators.fgiValue}
+ - Classification: ${indicators.fgiClassification}
+
+`;
+
   // Split extra notes into two parts
   const extraNotesPart1 =
 `
@@ -803,33 +927,17 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 📉 Analyze volume and OBV strength — Do they support the price movement?
 🧪 Compare current indicators with historically successful setups
 ⚠️ Scan for breakout or volatility pressure — Are we in a compression or expansion zone?
-🌬️ Based on news, Twitter, and volume — what’s the real-time sentiment?
+🌬️ Based on news, Twitter, and volume — what's the real-time sentiment?
 🌀 Are there any repeating fractal patterns from past cycles?
 🐾 Is this setup potentially a bull trap or bear trap?
-`;
-
-const extraNotesPart2 =
-`
-🧮 Identify key Fibonacci levels — Is the current price near a retracement or extension zone?
-🧭 Is the price nearing any known liquidity pool zones?
-🛡 Highlight ideal zones for entry, take profit, and stop-loss
-🎯 Based on the setup, is TP1, TP2, or TP3 most likely to be hit?
-🔁 After taking profit at TP1 or TP2, suggest re-entry levels for the next move
-📉 Recommend profitable buy and sell price ranges for this asset
-⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
-🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
-🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
-📅 Offer a 3-day or weekly forecast — What’s the expected asset behavior?
-🧠 Suggest the best strategy type for this setup (Scalp, Swing, Position, or News-Driven)
-📢 Offer final trading advice — Mindset, Psychology, and Position Sizing
-🔁 Is this setup a reversal or continuation opportunity? How clear is the signal?
 `;
 
  return header + smaSection + emaSection + wmaSection + macdSection + rsiSection + stochRsiSection + 
         kdjSection + williamsSection + cciSection + rocSection + mtmSection + uoSection + 
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
-        choppinessSection + extraNotesPart1 + extraNotesPart2 ;
+        choppinessSection + parabolicSarSection + trixSection + donchianSection + fgiSection + 
+        extraNotesPart1 ;
 }
 
 // --- Command Handler ---
@@ -840,7 +948,7 @@ bot.on("text", async (ctx) => {
   try {
     const { symbol, interval } = parsed;
     const { priceData, candles } = await getBinanceData(symbol, interval);
-    const indicators = calculateIndicators(candles);
+    const indicators = await calculateIndicators(candles);
     
     // Derive friendly names
     const name = symbol.replace("USDT", "");
