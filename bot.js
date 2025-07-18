@@ -929,6 +929,11 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 ⚠️ Scan for breakout or volatility pressure — Are we in a compression or expansion zone?
 🔄 After a breakout, is a retest likely? Should we wait for confirmation?
 🌬️ Based on news, Twitter, and volume — what’s the real-time sentiment?
+);
+`;
+
+const extraNotesPart2 =
+`
 🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar, etc.
 🔄 Determine whether a reversal or continuation pattern is forming
 🌀 Are there any repeating fractal patterns from past cycles?
@@ -938,6 +943,11 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 🛡 Highlight ideal zones for entry, take profit, and stop-loss
 🎯 Based on the setup, is TP1, TP2, or TP3 most likely to be hit?
 🔁 After taking profit at TP1 or TP2, suggest re-entry levels for the next move
+);
+`;
+
+const extraNotesPart3 =
+`
 📉 Recommend profitable buy and sell price ranges for this asset
 ⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
 🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
@@ -955,7 +965,7 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
         choppinessSection + parabolicSarSection + trixSection + donchianSection + fgiSection + 
-        extraNotesPart1 ;
+        extraNotesPart1 + extraNotesPart2 + extraNotesPart3 ;
 }
 
 // --- Command Handler ---
