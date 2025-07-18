@@ -826,11 +826,29 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 );
 `;
 
+const extraNotesPart2 =
+`
+🧮 Identify key Fibonacci levels — Is the current price near a retracement or extension zone?
+🧭 Is the price nearing any known liquidity pool zones?
+🛡 Highlight ideal zones for entry, take profit, and stop-loss
+🎯 Based on the setup, is TP1, TP2, or TP3 most likely to be hit?
+🔁 After taking profit at TP1 or TP2, suggest re-entry levels for the next move
+📉 Recommend profitable buy and sell price ranges for this asset
+⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
+🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
+🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
+📅 Offer a 3-day or weekly forecast — What’s the expected asset behavior?
+📰 Is there any upcoming news or event that could impact the market or this asset?
+🧠 Suggest the best strategy type for this setup (Scalp, Swing, Position, or News-Driven)
+📢 Offer final trading advice — Mindset, Psychology, and Position Sizing
+🔁 Is this setup a reversal or continuation opportunity? How clear is the signal?
+`;
+
  return header + smaSection + emaSection + wmaSection + macdSection + rsiSection + stochRsiSection + 
         kdjSection + williamsSection + cciSection + rocSection + mtmSection + uoSection + 
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
-        choppinessSection + extraNotesPart1 ;
+        choppinessSection + extraNotesPart1 + extraNotesPart2 ;
 }
 
 // --- Command Handler ---
