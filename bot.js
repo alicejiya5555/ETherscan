@@ -514,39 +514,39 @@ async function calculateIndicators(candles) {
   }));
 
   // 📉 ICHIMOKU (9, 26, 52)
-  function getIchimoku(candles) {
-    const high = candles.map(c => c.high);
-    const low = candles.map(c => c.low);
+function getIchimoku(candles) {
+  const high = candles.map(c => c.high);
+  const low = candles.map(c => c.low);
 
-    const period9 = 9;
-    const period26 = 26;
-    const period52 = 52;
+  const period9 = 9;
+  const period26 = 26;
+  const period52 = 52;
 
-    if (candles.length < period52) {
-      return { conversionLine: 'n/a', baseLine: 'n/a', leadingSpanA: 'n/a', leadingSpanB: 'n/a' };
-    }
-
-    const recentHigh9 = Math.max(...high.slice(-period9));
-    const recentLow9 = Math.min(...low.slice(-period9));
-    const conversionLine = ((recentHigh9 + recentLow9) / 2).toFixed(2);
-
-    const recentHigh26 = Math.max(...high.slice(-period26));
-    const recentLow26 = Math.min(...low.slice(-period26));
-    const baseLine = ((recentHigh26 + recentLow26) / 2).toFixed(2);
-
-    const leadingSpanA = (((parseFloat(conversionLine) + parseFloat(baseLine)) / 2).toFixed(2);
-
-    const recentHigh52 = Math.max(...high.slice(-period52));
-    const recentLow52 = Math.min(...low.slice(-period52));
-    const leadingSpanB = ((recentHigh52 + recentLow52) / 2).toFixed(2);
-
-    return {
-      conversionLine,
-      baseLine,
-      leadingSpanA,
-      leadingSpanB
-    };
+  if (candles.length < period52) {
+    return { conversionLine: 'n/a', baseLine: 'n/a', leadingSpanA: 'n/a', leadingSpanB: 'n/a' };
   }
+
+  const recentHigh9 = Math.max(...high.slice(-period9));
+  const recentLow9 = Math.min(...low.slice(-period9));
+  const conversionLine = ((recentHigh9 + recentLow9) / 2).toFixed(2);
+
+  const recentHigh26 = Math.max(...high.slice(-period26));
+  const recentLow26 = Math.min(...low.slice(-period26));
+  const baseLine = ((recentHigh26 + recentLow26) / 2).toFixed(2);
+
+  const leadingSpanA = ((parseFloat(conversionLine) + parseFloat(baseLine)) / 2).toFixed(2);
+
+  const recentHigh52 = Math.max(...high.slice(-period52));
+  const recentLow52 = Math.min(...low.slice(-period52));
+  const leadingSpanB = ((recentHigh52 + recentLow52) / 2).toFixed(2);
+
+  return {
+    conversionLine,
+    baseLine,
+    leadingSpanA,
+    leadingSpanB
+  };
+}
 
   // 📊 KDJ indicator calculation
   const kdj = getKDJ(candles);
