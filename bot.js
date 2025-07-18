@@ -793,9 +793,10 @@ const choppinessSection =
   // Split extra notes into two parts
   const extraNotesPart1 =
 `
+Calculate Values of all thes Indicatotors and Give me Out Put:
 📍 Final Signal Summary
-📉 What is the overall trend direction? (Bullish, Bearish, or Sideways)
-📊 Provide a detailed breakdown of indicator behaviors — RSI, MACD, EMA, Volume
+📉 What is the overall trend direction? (Bullish, Bearish, or Sideways, positive,Negative, Neutral)
+📊 Provide a detailed breakdown of indicator behaviors — RSI, MACD, EMA, Volume, etc.
 🔍 Is there any hidden or classic divergence visible (on RSI, MACD, or OBV)?
 📈 Are EMAs aligned in a bullish or bearish structure?
 🌡 Present a momentum heatmap — Is momentum rising or fading?
@@ -803,12 +804,8 @@ const choppinessSection =
 🧪 Compare current indicators with historically successful setups
 ⚠️ Scan for breakout or volatility pressure — Are we in a compression or expansion zone?
 🔄 After a breakout, is a retest likely? Should we wait for confirmation?
-🌬️ Based on news, Twitter, and volume — what's the real-time sentiment?
-`;
-
-  const extraNotesPart2 =
-`
-🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar
+🌬️ Based on news, Twitter, and volume — what’s the real-time sentiment?
+🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar, etc.
 🔄 Determine whether a reversal or continuation pattern is forming
 🌀 Are there any repeating fractal patterns from past cycles?
 🐾 Is this setup potentially a bull trap or bear trap?
@@ -820,13 +817,20 @@ const choppinessSection =
 📉 Recommend profitable buy and sell price ranges for this asset
 ⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
 🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
+🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
+📅 Offer a 3-day or weekly forecast — What’s the expected asset behavior?
+📰 Is there any upcoming news or event that could impact the market or this asset?
+🧠 Suggest the best strategy type for this setup (Scalp, Swing, Position, or News-Driven)
+📢 Offer final trading advice — Mindset, Psychology, and Position Sizing
+🔁 Is this setup a reversal or continuation opportunity? How clear is the signal?
+);
 `;
 
  return header + smaSection + emaSection + wmaSection + macdSection + rsiSection + stochRsiSection + 
         kdjSection + williamsSection + cciSection + rocSection + mtmSection + uoSection + 
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
-        choppinessSection + extraNotesPart1 + extraNotesPart2;
+        choppinessSection + extraNotesPart1 ;
 }
 
 // --- Command Handler ---
