@@ -803,10 +803,7 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 📉 Analyze volume and OBV strength — Do they support the price movement?
 🧪 Compare current indicators with historically successful setups
 ⚠️ Scan for breakout or volatility pressure — Are we in a compression or expansion zone?
-🔄 After a breakout, is a retest likely? Should we wait for confirmation?
 🌬️ Based on news, Twitter, and volume — what’s the real-time sentiment?
-🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar, etc.
-🔄 Determine whether a reversal or continuation pattern is forming
 🌀 Are there any repeating fractal patterns from past cycles?
 🐾 Is this setup potentially a bull trap or bear trap?
 `;
