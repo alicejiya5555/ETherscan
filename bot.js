@@ -932,7 +932,7 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 );
 `;
 
-const extraNotesPart2 =
+const otherwords =
 `
 🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar, etc.
 🔄 Determine whether a reversal or continuation pattern is forming
@@ -946,7 +946,7 @@ const extraNotesPart2 =
 );
 `;
 
-const extraNotesPart3 =
+const extrawords =
 `
 📉 Recommend profitable buy and sell price ranges for this asset
 ⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
@@ -965,7 +965,7 @@ const extraNotesPart3 =
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
         choppinessSection + parabolicSarSection + trixSection + donchianSection + fgiSection + 
-        extraNotesPart1 + extraNotesPart2 + extraNotesPart3 ;
+        extraNotesPart1 + otherwords + extrawords ;
 }
 
 // --- Command Handler ---
