@@ -929,11 +929,6 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 ⚠️ Scan for breakout or volatility pressure — Are we in a compression or expansion zone?
 🔄 After a breakout, is a retest likely? Should we wait for confirmation?
 🌬️ Based on news, Twitter, and volume — what’s the real-time sentiment?
-);
-`;
-
-const otherwords =
-`
 🕯 Identify strong candlestick patterns — Engulfing, Doji, Pin Bar, etc.
 🔄 Determine whether a reversal or continuation pattern is forming
 🌀 Are there any repeating fractal patterns from past cycles?
@@ -943,20 +938,9 @@ const otherwords =
 🛡 Highlight ideal zones for entry, take profit, and stop-loss
 🎯 Based on the setup, is TP1, TP2, or TP3 most likely to be hit?
 🔁 After taking profit at TP1 or TP2, suggest re-entry levels for the next move
-);
-`;
-
-const extrawords =
-`
 📉 Recommend profitable buy and sell price ranges for this asset
 ⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
 🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
-🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
-📅 Offer a 3-day or weekly forecast — What’s the expected asset behavior?
-📰 Is there any upcoming news or event that could impact the market or this asset?
-🧠 Suggest the best strategy type for this setup (Scalp, Swing, Position, or News-Driven)
-📢 Offer final trading advice — Mindset, Psychology, and Position Sizing
-🔁 Is this setup a reversal or continuation opportunity? How clear is the signal?
 );
 `;
 
@@ -965,7 +949,7 @@ const extrawords =
         adxSection + bbSection + keltnerSection + atrSection + adsocsection + mfiSection + 
         vwapSection + ichimokuSection + superTrendSection + tdiSection + heikinAshiSection + 
         choppinessSection + parabolicSarSection + trixSection + donchianSection + fgiSection + 
-        extraNotesPart1 + otherwords + extrawords ;
+        extraNotesPart1 ;
 }
 
 // --- Command Handler ---
