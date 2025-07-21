@@ -939,10 +939,6 @@ Calculate Values of all thes Indicatotors and Give me Out Put:
 🎯 Based on the setup, is TP1, TP2, or TP3 most likely to be hit?
 🔁 After taking profit at TP1 or TP2, suggest re-entry levels for the next move
 📉 Recommend profitable buy and sell price ranges for this asset
-⏳ Compare signals across multiple timeframes (1H, 4H, Daily) — Is there confluence?
-🐋 Detect whale movements vs. retail traders — Based on wallet activity or order book flow
-🕰 Suggest optimal entry and exit times (based on UTC+07:00 timezone)
-📅 Offer a 3-day or weekly forecast — What’s the expected asset behavior?
 );
 `;
 
